@@ -27,7 +27,8 @@ hf::Hackflight hackflight;
 // MSP comms
 #include "msppg/MSPPG.h"
 
-// Loiter support
+// PID controllers
+#include <pidcontrollers/level.hpp>
 #include <pidcontrollers/loiter.hpp>
 
 // Controller
@@ -66,13 +67,15 @@ void hf::Board::outbuf(char * buf)
 
 // PID tuning
 
-hf::Stabilizer stabilizer = hf::Stabilizer(
-	1.0f,       // Level P
-	.00001f,    // Gyro cyclic P
-	0,			// Gyro cyclic I
-	0,			// Gyro cyclic D
-	0,			// Gyro yaw P
-	0);			// Gyro yaw I
+hf::Rate ratePid = hf::Rate(
+	.1f,    // Gyro cyclic P
+	0.f,	// Gyro cyclic I
+	0.f,	// Gyro cyclic D
+	.1f,	// Gyro yaw P
+	0.f,	// Gyro yaw I
+	8.f);	// Demands to rate
+
+hf::Level level = hf::Level(1.0f);
 
 #ifdef _PYTHON
 PythonLoiter loiter = PythonLoiter(
@@ -114,7 +117,10 @@ AHackflightSimPawn::AHackflightSimPawn()
 	RootComponent = PlaneMesh;
 
 	// Start Hackflight firmware, indicating already armed
-	hackflight.init(this, &controller, &mixer, &stabilizer, true);
+	hackflight.init(this, &controller, &mixer, &ratePid, true);
+
+    // Add level PID
+    hackflight.addPidController(&level, 1);
 
 	// Add optical-flow sensor
 	hackflight.addSensor(&_flowSensor);
