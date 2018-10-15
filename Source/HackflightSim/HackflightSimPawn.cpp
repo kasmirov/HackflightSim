@@ -75,7 +75,7 @@ hf::Rate ratePid = hf::Rate(
 	0.f,	// Gyro yaw I
 	8.f);	// Demands to rate
 
-hf::Level level = hf::Level(1.0f);
+hf::Level level = hf::Level(0.1f);
 
 #ifdef _PYTHON
 PythonLoiter loiter = PythonLoiter(
